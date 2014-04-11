@@ -16,11 +16,14 @@ public class SistemaOperacional {
 	
 	public static void main(String[] args) {
 	
-		processos.add(new Processo(new Programa("Word",5)));
+		processos.add(new Processo(new Programa("Word",25)));
+		processos.add(new Processo(new Programa("Excel",30)));
+		processos.add(new Processo(new Programa("Chrome",16)));
+		processos.add(new Processo(new Programa("Skype",14)));
 		
 		Escalonador esc = new Escalonador(processos);
 		
-		esc.setMode(TipoEscalonamento.SJF);
+		esc.setMode(TipoEscalonamento.FIFO);
 		
 	}
 }

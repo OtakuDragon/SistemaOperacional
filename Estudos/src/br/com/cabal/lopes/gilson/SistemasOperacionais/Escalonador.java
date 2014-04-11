@@ -20,7 +20,11 @@ public class Escalonador {
 		switch (tipo) {
 		case FIFO:
 			
-			organizeFIFO(processos);
+			try {
+				organizeFIFO(processos);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			break;
 			
@@ -51,16 +55,27 @@ public class Escalonador {
 		}
 	}
 
-	private void organizeFIFO(List<Processo> procList) {
+	private void organizeFIFO(List<Processo> procList) throws UniqueRunnerException,InterruptedException{
 		System.out.println("Organizando em First In First Out");
+		for (Processo processo : procList) {
+			
+			processo.activate();
+			new Thread(processo).start();
+		
+			while(processo.getEstado()){
+				Thread.sleep(3000);
+			}
+			
+			procList.remove(this);
+		
+		}
+		
 		
 	}
 
 	private void organizeSJF(List<Processo> procList) throws UniqueRunnerException,InterruptedException {
 		System.out.println("Organizando em Short Job First");
-		procList.get(0).activate();
 		
-		new Thread(procList.get(0)).start();
 //		Thread.sleep(2000);
 //		procList.get(0).stop();
 //		Thread.sleep(2000);

@@ -1,6 +1,7 @@
 package br.com.cabal.lopes.gilson.SistemasOperacionais.abstractClasses;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import br.com.cabal.lopes.gilson.SistemasOperacionais.SistemaOperacional;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.exceptions.UniqueRunnerException;
@@ -13,6 +14,7 @@ public class Processo implements Runnable {
 	private int quantumRefer = SistemaOperacional.quantum;
 	private int palavra = SistemaOperacional.palavra;
 	boolean estado = false;//true = ativo false = inativo
+	private boolean finished = false;
 	private List<Processo> listaProcs = SistemaOperacional.processos;
 	
 
@@ -35,7 +37,7 @@ public class Processo implements Runnable {
 			quantum--;
 			tamanho -= palavra;
 			
-			if(tamanho <= 0 || quantum <=0 ){		
+			if(tamanho <= 0 || quantum <=0 ){	
 				this.stop();
 				return;
 			}
@@ -62,6 +64,7 @@ public class Processo implements Runnable {
 	}
 	
 	public synchronized void stop(){
+	
 		
 		this.setEstado(false);
 		this.setQuantum(this.getQuantumRefer());
@@ -72,7 +75,8 @@ public class Processo implements Runnable {
 			System.out.println("Motivo: O Quantum Zerou");
 		}else{
 			System.out.println("Motivo: O Processo foi completamente executado");
-			listaProcs.remove(this);
+			//listaProcs.remove(this);
+			this.setFinished(true);
 			
 		}
 		
@@ -85,6 +89,8 @@ public class Processo implements Runnable {
 		}
 		
 		System.out.println("Tamanho Restante para a Execução:" +tam+" Kb.");
+		
+		
 		
 	}
 	
@@ -108,6 +114,10 @@ public class Processo implements Runnable {
 	private void setEstado(boolean estado) {
 		this.estado = estado;
 	}
+	
+	public boolean getEstado() {
+		return this.estado;
+	}
 
 	public int getQuantumRefer() {
 		return quantumRefer;
@@ -123,5 +133,13 @@ public class Processo implements Runnable {
 
 	public void setNome(String nome) {
 		this.nome = nome;
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(boolean finished) {
+		this.finished = finished;
 	}
 }
