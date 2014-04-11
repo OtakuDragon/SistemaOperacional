@@ -4,6 +4,7 @@ import java.util.List;
 
 import br.com.cabal.lopes.gilson.SistemasOperacionais.abstractClasses.Processo;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.enums.TipoEscalonamento;
+import br.com.cabal.lopes.gilson.SistemasOperacionais.exceptions.UniqueRunnerException;
 
 public class Escalonador {
 
@@ -25,7 +26,11 @@ public class Escalonador {
 			
 		case SJF:
 			
-			organizeSJF(processos);
+			try {
+				organizeSJF(processos);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			break;
 
@@ -51,29 +56,16 @@ public class Escalonador {
 		
 	}
 
-	private void organizeSJF(List<Processo> procList) {
+	private void organizeSJF(List<Processo> procList) throws UniqueRunnerException,InterruptedException {
 		System.out.println("Organizando em Short Job First");
-		procList.get(0).setEstado(true);
+		procList.get(0).activate();
 		
 		new Thread(procList.get(0)).start();
-		
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		procList.get(0).setEstado(false);
-		
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		procList.get(0).setEstado(true);
+//		Thread.sleep(2000);
+//		procList.get(0).stop();
+//		Thread.sleep(2000);
+//		procList.get(0).activate(procList);
+		procList.get(0).activate();
 		
 		new Thread(procList.get(0)).start();
 	}
