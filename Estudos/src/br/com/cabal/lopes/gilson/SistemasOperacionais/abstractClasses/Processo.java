@@ -3,14 +3,17 @@ package br.com.cabal.lopes.gilson.SistemasOperacionais.abstractClasses;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import br.com.cabal.lopes.gilson.SistemasOperacionais.Escalonador;
+import br.com.cabal.lopes.gilson.SistemasOperacionais.Quantum;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.SistemaOperacional;
+import br.com.cabal.lopes.gilson.SistemasOperacionais.enums.TipoEscalonamento;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.exceptions.UniqueRunnerException;
 
-public class Processo implements Runnable {
+public class Processo implements Runnable,Comparable<Processo> {
 	
 	private String nome;
 	private int tamanho;
-	private int quantum;
+	public int quantum;
 	private int quantumRefer = SistemaOperacional.quantum;
 	private int palavra = SistemaOperacional.palavra;
 	boolean estado = false;//true = ativo false = inativo
@@ -26,16 +29,20 @@ public class Processo implements Runnable {
 	}
 	
 	private synchronized void ticTac() throws InterruptedException{
-		while(quantum > 0 && estado == true && tamanho > 0){
+		while(quantum > 0 && estado == true || finished == false && tamanho > 0){
 			
-			Thread.sleep(1000);
+			
 			System.out.println("================================================");
 			System.out.println("Nome do Processo em execução: "+this.getNome()+".");
 			System.out.println("Segundos Restantes no Quantum: " +this.getQuantum()+" Segundos.");
-			System.out.println("Tamanho Restante para a Execução:" +this.getTamanho()+" Kb.");
+			System.out.println("Tamanho Restante para a Execução:" +this.getTamanho()+" bits.");
 
-			quantum--;
+			
 			tamanho -= palavra;
+			
+			if(tamanho>0 && this.quantum<=0 &&  Escalonador.tipo == TipoEscalonamento.FIFO || Escalonador.tipo == TipoEscalonamento.SJF){
+				quantum = quantumRefer;
+			}
 			
 			if(tamanho <= 0 || quantum <=0 ){	
 				this.stop();
@@ -47,6 +54,7 @@ public class Processo implements Runnable {
 	@Override
 	public void run() {
 		try {
+			new Thread(new Quantum(this)).start();
 			ticTac();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -75,7 +83,7 @@ public class Processo implements Runnable {
 			System.out.println("Motivo: O Quantum Zerou");
 		}else{
 			System.out.println("Motivo: O Processo foi completamente executado");
-			//listaProcs.remove(this);
+			listaProcs.remove(this);
 			this.setFinished(true);
 			
 		}
@@ -89,9 +97,55 @@ public class Processo implements Runnable {
 		}
 		
 		System.out.println("Tamanho Restante para a Execução:" +tam+" Kb.");
+		if(listaProcs.size() == 0){
+			
+			System.out.println("============================================");
+			Escalonador.printTime(2);
+			long diferenca = (Escalonador.fim.getTime()/1000) - (Escalonador.inicio.getTime()/1000);
+			long diffMillis = (Escalonador.fim.getTime()) - (Escalonador.inicio.getTime());
+			System.out.println("Tempo de execução: "+ diferenca  +" Segundos" );
+			System.out.println("Tempo de execução: "+ diffMillis  +" Millisegundos" );
+		}
+		
+		
+	}
+	
+	@Override
+	public int compareTo(Processo p) {
+		
+		//retorna -1 se this menor p
+		//retorna 0 se this igual p
+		//retorna 1 se this maior p
 		
 		
 		
+		switch (Escalonador.tipo) {
+		case FIFO:
+			break;
+			
+		case SJF:
+			
+			if(this.getTamanho()< p.getTamanho()){
+				return -1;
+			}else if(this.getTamanho()> p.getTamanho()){
+				return 1;
+				
+			}
+				return 1;
+			
+		case SRT:
+			
+			break;
+			
+		case RR:
+			
+			break;
+			
+		default:
+			break;
+		}
+		
+		return 0;
 	}
 	
 	
@@ -142,4 +196,6 @@ public class Processo implements Runnable {
 	public void setFinished(boolean finished) {
 		this.finished = finished;
 	}
+
+
 }
