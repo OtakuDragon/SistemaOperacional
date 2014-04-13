@@ -3,20 +3,20 @@ package br.com.cabal.lopes.gilson.SistemasOperacionais.abstractClasses;
 public class Programa {
 
 	private String nome;
-	private int tamanho;
+	private long tamanho;
 	
 	
 	
-	public Programa(String nome,int tamanho){
+	public Programa(String nome,long tamanho){
 		setTamanho(tamanho);
 		setNome(nome);
 	}
 	
-	public int getTamanho() {
+	public long getTamanho() {
 		return tamanho;
 	}
-	public void setTamanho(int tamanho) {
-		this.tamanho = tamanho;
+	public void setTamanho(long tamanho2) {
+		this.tamanho = tamanho2;
 	}
 
 	public String getNome() {
