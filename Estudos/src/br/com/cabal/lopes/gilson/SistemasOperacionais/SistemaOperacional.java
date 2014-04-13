@@ -30,10 +30,10 @@ public class SistemaOperacional {
 	public void startSO(){
 		
 	
-		processos.add(new Processo(new Programa("Excel",1000l)));
-		processos.add(new Processo(new Programa("Word",16000l)));
-		processos.add(new Processo(new Programa("Chrome",1600l)));
-		processos.add(new Processo(new Programa("Skype",2600l)));
+		processos.add(new Processo(new Programa("Excel",15000l)));
+		processos.add(new Processo(new Programa("Word",20000l)));
+		processos.add(new Processo(new Programa("Chrome",15000l)));
+		processos.add(new Processo(new Programa("Skype",5000l)));
 //		processos.add(new Processo(new Programa("P1",10000l)));
 //		processos.add(new Processo(new Programa("P2",14600l)));
 //		processos.add(new Processo(new Programa("P3",14800l)));
@@ -45,7 +45,7 @@ public class SistemaOperacional {
 //		processos.add(new Processo(new Programa("P9",20000l)));
 //		processos.add(new Processo(new Programa("P10",10000l)));
 ////		
-		MonitorDeProcessos.labelQuantum.setText(String.valueOf(quantum-1));
+		MonitorDeProcessos.labelQuantum.setText(String.valueOf(quantum));
 		MonitorDeProcessos.labelTamanhoDaPalavra.setText(String.valueOf(palavra));
 		MonitorDeProcessos.labelTamanhoDaLista.setText(String.valueOf(processos.size()));
 		MonitorDeProcessos.print(this,"Execução de processos iniciada");

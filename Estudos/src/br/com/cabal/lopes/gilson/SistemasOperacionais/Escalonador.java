@@ -54,13 +54,21 @@ public class Escalonador {
 			break;
 
 		case SRT:
-			tipo = TipoEscalonamento.SRT;
-			organizeSRT(processos);
+			Escalonador.tipo = TipoEscalonamento.SRT;
+			try {
+				organizeSRT(processos);
+			} catch (UniqueRunnerException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			break;
 			
 		case RR:
-			tipo = TipoEscalonamento.RR;
+			Escalonador.tipo = TipoEscalonamento.RR;
 			try {
 				organizeRR(processos);
 			} catch (Exception e) {
@@ -146,9 +154,31 @@ public class Escalonador {
 		
 	}
 
-	private void organizeSRT(List<Processo> procList) {
+	private void organizeSRT(List<Processo> procList) throws UniqueRunnerException,InterruptedException {
 		MonitorDeProcessos.print(this,"Organizando em Shortest Remaining Time");
 		printTime(1);
+		
+		while(procList.size()>0){
+	
+			Collections.sort(procList);
+			Processo processo = procList.get(0); 
+			
+			for (Processo proc : procList) {
+				System.out.print(" ,"+proc.getNome()+" tamanho: "+proc.getTamanho());
+			}
+			System.out.println("\n");
+			processo.activate();
+			new Thread(processo).start();
+		
+			while(processo.getEstado()){
+				Thread.sleep(1);
+			}
+			
+			if(processo.getTamanho()>0){
+				processo.setFinished(false);
+				procList.add(processo);
+			}
+		}
 		
 	}
 	

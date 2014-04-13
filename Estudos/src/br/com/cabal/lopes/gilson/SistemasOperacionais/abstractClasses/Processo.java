@@ -1,6 +1,7 @@
 package br.com.cabal.lopes.gilson.SistemasOperacionais.abstractClasses;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 import br.com.cabal.lopes.gilson.SistemasOperacionais.Escalonador;
@@ -14,11 +15,12 @@ public class Processo implements Runnable,Comparable<Processo> {
 	
 	private String nome;
 	private long tamanho;
-	public int quantum;
+	public  int quantum;
 	public static int quantumRefer = MonitorDeProcessos.so.quantum;
 	public static int palavra= MonitorDeProcessos.so.palavra;
 	boolean estado = false;//true = ativo false = inativo
 	private boolean finished = false;
+	boolean first = true;
 	public static List<Processo> listaProcs = MonitorDeProcessos.so.processos;
 	
 
@@ -30,6 +32,7 @@ public class Processo implements Runnable,Comparable<Processo> {
 	}
 	
 	private synchronized void ticTac() throws InterruptedException{
+		first = true;
 		while(quantum > 0 && estado == true || finished == false && tamanho > 0){
 			
 			
@@ -37,11 +40,12 @@ public class Processo implements Runnable,Comparable<Processo> {
 			MonitorDeProcessos.labelQuantumRestante.setText(String.valueOf(this.getQuantum()));
 			MonitorDeProcessos.labelTamanhoProcesso.setText(String.valueOf(getTamanho()));
 
-			
+
 			tamanho -= palavra;
 			
+			
 			if(tamanho>0 && this.quantum<=0 &&  (Escalonador.tipo == TipoEscalonamento.FIFO || Escalonador.tipo == TipoEscalonamento.SJF)){
-				quantum = quantumRefer-1;
+				quantum = quantumRefer;
 			}
 			
 			if(tamanho <= 0 || quantum <=0 ){	
@@ -51,14 +55,25 @@ public class Processo implements Runnable,Comparable<Processo> {
 		}
 	}
 	
+	
+	
 	@Override
 	public void run() {
 		try {
+		if(Escalonador.tipo == TipoEscalonamento.SRT){
+			if(first){
+				new Thread(new Quantum(this)).start();
+			}
+		}else{
 			new Thread(new Quantum(this)).start();
-			ticTac();
+		}
+				ticTac();
+			
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
 		
 	}
 	
@@ -76,6 +91,7 @@ public class Processo implements Runnable,Comparable<Processo> {
 	
 		Processo ultimo = null;
 		boolean podeTerminar = true;
+		first = false;
 		
 		MonitorDeProcessos.print(this,"================================================");
 		MonitorDeProcessos.print(this,"PROCESSO PARADO");
@@ -150,7 +166,13 @@ public class Processo implements Runnable,Comparable<Processo> {
 			
 		case SRT:
 			
-			break;
+			if(this.getTamanho()< p.getTamanho()){
+				return -1;
+			}else if(this.getTamanho()> p.getTamanho()){
+				return 1;
+				
+			}
+				return 1;
 			
 		case RR:
 			
