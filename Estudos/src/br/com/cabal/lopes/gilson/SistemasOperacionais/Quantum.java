@@ -18,7 +18,7 @@ public class Quantum implements Runnable {
 			processo.setQuantum(--processo.quantum);
 			Thread.sleep(1000);
 			
-			if(processo.quantum< -3){
+			if(processo.quantum< -1){
 				break;
 			}
 			}

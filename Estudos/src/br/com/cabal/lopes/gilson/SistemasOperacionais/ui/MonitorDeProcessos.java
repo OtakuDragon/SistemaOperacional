@@ -74,7 +74,7 @@ public class MonitorDeProcessos extends JFrame {
 	public static synchronized void update(Component c){
 		c.update(c.getGraphics());
 		try {
-			Thread.sleep(40);
+			Thread.sleep(60);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -339,7 +339,7 @@ public class MonitorDeProcessos extends JFrame {
 							@Override
 							public void run() {
 								btnExecutar.setEnabled(false);
-								so = new SistemaOperacional(128,11,(TipoEscalonamento)comboBox.getSelectedItem());
+								so = new SistemaOperacional(128,10,(TipoEscalonamento)comboBox.getSelectedItem());
 								so.startSO();
 								
 							}}).start();
