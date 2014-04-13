@@ -10,6 +10,7 @@ import java.util.List;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.abstractClasses.Processo;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.enums.TipoEscalonamento;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.exceptions.UniqueRunnerException;
+import br.com.cabal.lopes.gilson.SistemasOperacionais.ui.MonitorDeProcessos;
 
 public class Escalonador {
 
@@ -17,7 +18,11 @@ public class Escalonador {
 	static public Date inicio;
 	static public Date fim;
 	static public TipoEscalonamento tipo;
+
 	
+	public Escalonador() {
+		
+	}
 	
 	public Escalonador(List<Processo> processos) {
 		this.processos = processos;
@@ -70,7 +75,7 @@ public class Escalonador {
 	}
 
 	private void organizeFIFO(List<Processo> procList) throws UniqueRunnerException,InterruptedException{
-		System.out.println("Organizando em First In First Out");
+		MonitorDeProcessos.print(this,"Organizando em First In First Out");
 		printTime(1);
 		
 		int tamanhoLista = procList.size();
@@ -89,7 +94,7 @@ public class Escalonador {
 	}
 
 	private void organizeSJF(List<Processo> procList) throws UniqueRunnerException,InterruptedException {
-		System.out.println("Organizando em Short Job First");
+		MonitorDeProcessos.print(this,"Organizando em Short Job First");
 		printTime(1);
 		Collections.sort(procList);
 		for (Processo processo : procList) {
@@ -112,23 +117,26 @@ public class Escalonador {
 	}
 
 	private void organizeRR(List<Processo> procList) throws UniqueRunnerException,InterruptedException {
-		System.out.println("Organizando em Round Robin");
+		MonitorDeProcessos.print(this,"Organizando em Round Robin");
 		printTime(1);
 		
-		int tamanhoLista = procList.size();
 		
 		while(procList.size()>0){
+	
 			
 			Processo processo = procList.get(0); 
-			
+			for (Processo proc : procList) {
+				System.out.print(" ,"+proc.getNome());
+			}
+			System.out.println("\n");
 			processo.activate();
 			new Thread(processo).start();
 		
 			while(processo.getEstado()){
 				Thread.sleep(1);
 			}
+
 			if(processo.getTamanho()>0){
-				processo.setQuantum(processo.getQuantumRefer());
 				processo.setFinished(false);
 				procList.add(processo);
 				
@@ -139,7 +147,7 @@ public class Escalonador {
 	}
 
 	private void organizeSRT(List<Processo> procList) {
-		System.out.println("Organizando em Shortest Remaining Time");
+		MonitorDeProcessos.print(this,"Organizando em Shortest Remaining Time");
 		printTime(1);
 		
 	}
@@ -151,11 +159,11 @@ public class Escalonador {
 		
 		if (quando == 1){
 			inicio = time;
-			System.out.println("Execução iniciada às:  " + f.format(time));
+			MonitorDeProcessos.print(new Escalonador(),"Execução iniciada às:  " + f.format(time));
 			
 		}else if(quando == 2){
 			fim = time;
-			System.out.println("Execução terminada às:  " + f.format(time));
+			MonitorDeProcessos.print(new Escalonador(),"Execução terminada às:  " + f.format(time));
 		}
 	}
 

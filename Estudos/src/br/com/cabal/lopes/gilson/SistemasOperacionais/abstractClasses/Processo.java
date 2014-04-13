@@ -8,17 +8,18 @@ import br.com.cabal.lopes.gilson.SistemasOperacionais.Quantum;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.SistemaOperacional;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.enums.TipoEscalonamento;
 import br.com.cabal.lopes.gilson.SistemasOperacionais.exceptions.UniqueRunnerException;
+import br.com.cabal.lopes.gilson.SistemasOperacionais.ui.MonitorDeProcessos;
 
 public class Processo implements Runnable,Comparable<Processo> {
 	
 	private String nome;
-	private int tamanho;
+	private long tamanho;
 	public int quantum;
-	private int quantumRefer = SistemaOperacional.quantum;
-	private int palavra = SistemaOperacional.palavra;
+	public static int quantumRefer = MonitorDeProcessos.so.quantum;
+	public static int palavra= MonitorDeProcessos.so.palavra;
 	boolean estado = false;//true = ativo false = inativo
 	private boolean finished = false;
-	private List<Processo> listaProcs = SistemaOperacional.processos;
+	public static List<Processo> listaProcs = MonitorDeProcessos.so.processos;
 	
 
 	
@@ -32,16 +33,15 @@ public class Processo implements Runnable,Comparable<Processo> {
 		while(quantum > 0 && estado == true || finished == false && tamanho > 0){
 			
 			
-			System.out.println("================================================");
-			System.out.println("Nome do Processo em execução: "+this.getNome()+".");
-			System.out.println("Segundos Restantes no Quantum: " +this.getQuantum()+" Segundos.");
-			System.out.println("Tamanho Restante para a Execução:" +this.getTamanho()+" bits.");
+			MonitorDeProcessos.labelNomeProcesso.setText(this.getNome());
+			MonitorDeProcessos.labelQuantumRestante.setText(String.valueOf(this.getQuantum()));
+			MonitorDeProcessos.labelTamanhoProcesso.setText(String.valueOf(getTamanho()));
 
 			
 			tamanho -= palavra;
 			
-			if(tamanho>0 && this.quantum<=0 &&  Escalonador.tipo == TipoEscalonamento.FIFO || Escalonador.tipo == TipoEscalonamento.SJF){
-				quantum = quantumRefer;
+			if(tamanho>0 && this.quantum<=0 &&  (Escalonador.tipo == TipoEscalonamento.FIFO || Escalonador.tipo == TipoEscalonamento.SJF)){
+				quantum = quantumRefer-1;
 			}
 			
 			if(tamanho <= 0 || quantum <=0 ){	
@@ -69,26 +69,39 @@ public class Processo implements Runnable,Comparable<Processo> {
 			}	
 		}
 		this.setEstado(true);
+	
 	}
 	
 	public synchronized void stop(){
 	
+		Processo ultimo = null;
+		boolean podeTerminar = true;
 		
-		this.setEstado(false);
-		this.setQuantum(this.getQuantumRefer());
-		System.out.println("================================================");
-		System.out.println("PROCESSO PARADO");
-		System.out.println("Nome do Processo em parado: "+this.getNome()+".");
+		MonitorDeProcessos.print(this,"================================================");
+		MonitorDeProcessos.print(this,"PROCESSO PARADO");
+		MonitorDeProcessos.print(this,"Nome do Processo em parado: "+this.getNome()+".");
+		if(listaProcs.size() == 1){
+			ultimo = this;
+			
+			if(ultimo.getTamanho()>0){
+				podeTerminar = false;
+			}
+		}
 		if(this.getQuantum() <= 0 && this.getTamanho()>0){
-			System.out.println("Motivo: O Quantum Zerou");
-		}else{
-			System.out.println("Motivo: O Processo foi completamente executado");
+			MonitorDeProcessos.print(this,"Motivo: O Quantum Zerou");
+			this.setQuantum(this.getQuantumRefer());
 			listaProcs.remove(this);
 			this.setFinished(true);
+		}else{
+			MonitorDeProcessos.print(this,"Motivo: O Processo foi completamente executado");
+			listaProcs.remove(this);
+			this.setFinished(true);
+			MonitorDeProcessos.labelTamanhoDaLista.setText(String.valueOf(listaProcs.size()));
 			
 		}
 		
-		int tam;
+		
+		long tam;
 		
 		if(this.getTamanho()<0){
 			tam = 0;
@@ -96,17 +109,19 @@ public class Processo implements Runnable,Comparable<Processo> {
 			tam = this.getTamanho();
 		}
 		
-		System.out.println("Tamanho Restante para a Execução:" +tam+" Kb.");
-		if(listaProcs.size() == 0){
+		MonitorDeProcessos.labelTamanhoProcesso.setText(String.valueOf(tam));
+		if(listaProcs.size() == 0 && podeTerminar){
 			
-			System.out.println("============================================");
+			MonitorDeProcessos.print(this,"============================================");
 			Escalonador.printTime(2);
 			long diferenca = (Escalonador.fim.getTime()/1000) - (Escalonador.inicio.getTime()/1000);
 			long diffMillis = (Escalonador.fim.getTime()) - (Escalonador.inicio.getTime());
-			System.out.println("Tempo de execução: "+ diferenca  +" Segundos" );
-			System.out.println("Tempo de execução: "+ diffMillis  +" Millisegundos" );
+			MonitorDeProcessos.print(this,"Tempo de execução: "+ diferenca  +" Segundos" );
+			MonitorDeProcessos.print(this,"Tempo de execução: "+ diffMillis  +" Millisegundos" );
+			//MonitorDeProcessos.btnExecutar.setEnabled(true);
 		}
 		
+		this.setEstado(false);
 		
 	}
 	
@@ -149,12 +164,12 @@ public class Processo implements Runnable,Comparable<Processo> {
 	}
 	
 	
-	public int getTamanho() {
+	public long getTamanho() {
 		return tamanho;
 	}
 
-	public void setTamanho(int tamanho) {
-		this.tamanho = tamanho;
+	public void setTamanho(long l) {
+		this.tamanho = l;
 	}
 
 	public int getQuantum() {
